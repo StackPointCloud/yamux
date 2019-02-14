@@ -30,7 +30,7 @@ var (
 	ErrRecvWindowExceeded = fmt.Errorf("recv window exceeded")
 
 	// ErrTimeout is used when we reach an IO deadline
-	ErrTimeout = fmt.Errorf("i/o deadline reached")
+	ErrTimeout = &timeoutError{}
 
 	// ErrStreamClosed is returned when using a closed stream
 	ErrStreamClosed = fmt.Errorf("stream closed")
@@ -120,6 +120,14 @@ const (
 	headerSize     = sizeOfVersion + sizeOfType + sizeOfFlags +
 		sizeOfStreamID + sizeOfLength
 )
+
+// timeoutError is returned for an expired deadline.
+type timeoutError struct{}
+
+// Implement the net.Error interface.
+func (e *timeoutError) Error() string   { return "i/o deadline reached" }
+func (e *timeoutError) Timeout() bool   { return true }
+func (e *timeoutError) Temporary() bool { return true }
 
 type header []byte
 
